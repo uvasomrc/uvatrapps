@@ -32,7 +32,7 @@ RUN rm -rf /srv/shiny-server/*
 
 # get the app code
 RUN git clone https://github.com/uvasomrc/uvatrapps.git
-RUN cp -rf uvatrapps/*  /srv/shiny-server/.
+RUN cp -rf uvatrapps/apps/*  /srv/shiny-server/.
 
 # get index.html setup
 COPY index.R /srv/shiny-server/index.R
