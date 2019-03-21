@@ -3,10 +3,10 @@ setwd(".")
 
 html <-
       "<html><head>
-      <title>Consultr</title>
+      <title>UVATRAPPS</title>
       </head>
       <body bgcolor='white'>
-      <h1>Consultr</h1>
+      <h1>UVATRAPPS</h1>
       <hr>
       <pre>
       <ul>"
