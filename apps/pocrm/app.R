@@ -5,7 +5,6 @@ library(shinyjs)
 library(pocrm)
 
 sim_jsResetCode <- "shinyjs.sim_reset = function() {history.go(0)}"
-
 imp_jsResetCode <- "shinyjs.imp_reset = function() {history.go(0)}"
 
 server <- function(input, output, session) {
@@ -36,8 +35,6 @@ server <- function(input, output, session) {
                  ) 
                )
   )
-  ## keep track of elements inserted and not yet removed
-  # sim_inserted <- c()
   
   observeEvent(input$sim_insertBtn, {
     btn <- input$sim_insertBtn
@@ -53,8 +50,6 @@ server <- function(input, output, session) {
         id = id
       )
     )
-    # sim_inserted <<- c(id, sim_inserted)
-    
     
   })
   
@@ -125,10 +120,6 @@ server <- function(input, output, session) {
     
     len <- sim_ndoses()$b * sim_ndoses()$a
     
-    # DF <- matrix(len:1, 
-    #              ncol = sim_ndoses()$b, 
-    #              nrow = sim_ndoses()$a)
-    
     DF <- matrix(1:len,
                  ncol = sim_ndoses()$b, 
                  nrow = sim_ndoses()$a,
@@ -155,14 +146,6 @@ server <- function(input, output, session) {
     
   })
   
-  # output$sim_debug <- renderPrint({
-  #   
-  #   req(input$simulate)
-  #   
-  #   sim_vals$orders_data
-  #   
-  # })
-  
   output$sim_res_df <- renderTable({
     
     req(input$simulate)
@@ -172,9 +155,6 @@ server <- function(input, output, session) {
   })
   
   sim_res <- eventReactive(input$simulate,{
-    
-    # get dlt probabilities (true toxicity rates) from handsontable
-    # r <- unlist(isolate(input$sim_hot)$data)
     
     # parsing dlt probs
     # need to get data (vector) from handsontable ...
@@ -365,29 +345,9 @@ server <- function(input, output, session) {
     
   })
   
-  # output$imp_hot <- renderRHandsontable({
-  #   
-  #   DF <- matrix(0, 
-  #                ncol = imp_ndoses()$b,
-  #                nrow = imp_ndoses()$a)
-  #   
-  #   row.names(DF) <- paste0("A", imp_ndoses()$a:1)
-  #   colnames(DF) <- paste0("B", imp_ndoses()$b:1)
-  #   
-  #   rhandsontable(DF)
-  #   
-  # })
-  
   output$imp_matrix <- renderTable({
     
     len <- imp_ndoses()$b * imp_ndoses()$a
-    
-    # DF <- matrix(len:1,
-    #              ncol = imp_ndoses()$b,
-    #              nrow = imp_ndoses()$a,
-    #              byrow = FALSE)
-    # 
-    # DF
     
     DF <- matrix(1:len,
                  ncol = imp_ndoses()$b, 
@@ -409,8 +369,6 @@ server <- function(input, output, session) {
     
     req(input$implement)
     
-    # mat <- unlist(isolate(input$imp_hot)$data)
-    # dlt <- matrix(mat, ncol = input$imp_ndoses_b, nrow = input$imp_ndoses_a)
     list(imp_res()$orders,imp_res()$fit,imp_res()$skeleton)
     
   })
@@ -429,8 +387,6 @@ server <- function(input, output, session) {
     orders <-
       imp_vals$orders_data
     
-    #Specify the skeleton values provided in Table 4.
-    # skeleton <- unlist(isolate(input$imp_hot)$data)
     # how many combinations of dosages are there?
     nlevel <- imp_ndoses()$a*imp_ndoses()$b
     
