@@ -30,7 +30,7 @@ server <- function(input, output, session) {
                      orderInput("simorder", 
                                 "", 
                                 items = 1:(input$sim_ndoses_a*input$sim_ndoses_b), 
-                                width = "200px"),
+                                width = "auto"),
                      tags$br(),
                      id = "initial_simorder")
                  ) 
@@ -48,7 +48,7 @@ server <- function(input, output, session) {
       ui = tags$div(
         orderInput(id, "", 
                    items = 1:(input$sim_ndoses_a*input$sim_ndoses_b), 
-                   width = "200px"), 
+                   width = "auto"), 
         tags$br(),
         id = id
       )
@@ -290,7 +290,7 @@ server <- function(input, output, session) {
                      orderInput("imporder", 
                                 "", 
                                 items = 1:(input$imp_ndoses_a*input$imp_ndoses_b), 
-                                width = "200px"),
+                                width = "auto"),
                      tags$br(),
                      id = "initial_imporder")
                  ) 
@@ -306,7 +306,7 @@ server <- function(input, output, session) {
       ui = tags$div(
         orderInput(id, "", 
                    items = 1:(input$imp_ndoses_a*input$imp_ndoses_b), 
-                   width = "200px"), 
+                   width = "auto"), 
         tags$br(),
         id = id
       )
