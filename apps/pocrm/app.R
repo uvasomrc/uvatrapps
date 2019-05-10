@@ -373,11 +373,11 @@ server <- function(input, output, session) {
     
   })
   
-  output$imp_debug <- renderPrint({
+  output$imp_res_df <- renderTable({
     
     req(input$implement)
     
-    imp_vals$orders_data
+    imp_res()$df
     
   })
   
@@ -426,9 +426,17 @@ server <- function(input, output, session) {
         y,
         combos)
     
+    df <-
+      data.frame(
+        levels = 1:length(orders[1,]),
+        skeleton = skeleton,
+        `Estimated DLT Probability` = fit$ptox.est
+      )
+    
     list(fit = fit,
          orders = orders,
-         skeleton = skeleton)
+         skeleton = skeleton,
+         df = df)
     
   })
   
@@ -489,9 +497,13 @@ ui <-
                                numericInput("seed", "Random Seed", value = sample(1:1e5, 1))),
                         id = "sim_other_inputs")
                       ),
-                      tableOutput("sim_res_df"),
-                      verbatimTextOutput("sim_debug"),
-                      verbatimTextOutput("sim_sum")
+                      fluidRow(
+                        column(6,
+                               tableOutput("sim_res_df")
+                        ),
+                        column(6,
+                               verbatimTextOutput("sim_sum"))
+                      )
              ),
              tabPanel(title = "Implementation",
                       useShinyjs(),
@@ -527,17 +539,21 @@ ui <-
                                tags$div(
                                  actionButton("imp_insertBtn", "Add orders", icon = icon("plus")))
                         ),
-                        column(2,
+                        column(4,
                                sliderInput("imp_target", "Target DLT Rate",
                                            min = 0, max = 1, value = 0.3),
+                               fileInput("imp_combos", "Observed Trial Data"),
                                actionButton("implement", "Get updated recommendation", icon = icon("flask"))
                         ),
-                        column(2,
-                               fileInput("imp_combos", "Observed Trial Data")),
                         id = "imp_other_inputs")
                       ),
-                      verbatimTextOutput("imp_debug"),
-                      verbatimTextOutput("imp_sum")
+                      fluidRow(
+                        column(6,
+                          tableOutput("imp_res_df")),
+                        column(6,
+                          verbatimTextOutput("imp_sum"))
+                        
+                      )
              )
              
   )
