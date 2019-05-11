@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y -t unstable \
     pandoc-citeproc \
     libsodium-dev \
     libssl-dev \
+    libv8-dev \
     libxml2-dev \
     r-cran-rmysql \
     libcurl4-gnutls-dev \
