@@ -19,6 +19,9 @@ server <- function(input, output, session) {
   observeEvent(input$sim_reset, 
                {js$sim_reset()})
   
+  observeEvent(input$simulate,
+               {shinyjs::show("sim-results-label")})
+  
   observeEvent(input$sim_dims,   
                # need to wrap in isolate so only triggers once
                isolate(
@@ -140,9 +143,18 @@ server <- function(input, output, session) {
     
     req(input$simulate)
     
-    mat <- unlist(isolate(input$sim_hot)$data)
-    dlt <- matrix(mat, ncol = input$sim_ndoses_b, nrow = input$sim_ndoses_a, byrow = TRUE)
-    list(dlt,sim_res()$orders,sim_res()$fit)
+    out <-
+      paste0(
+        "percent.DLT:",
+        sim_res()$fit$percent.DLT,
+        "\n",
+        "mean.n:",
+        sim_res()$fit$mean.n,
+        "\n",
+        "acceptable:",
+        sim_res()$fit$acceptable)
+
+    cat(out)
     
   })
   
@@ -259,6 +271,9 @@ server <- function(input, output, session) {
   observeEvent(input$imp_reset, 
                {js$imp_reset()})
   
+  observeEvent(input$implement,
+               {shinyjs::show("imp-results-label")})
+  
   observeEvent(input$imp_dims,   
                # need to wrap in isolate so only triggers once
                isolate(
@@ -266,7 +281,6 @@ server <- function(input, output, session) {
                    selector = "#initial_imporder",
                    ## wrap element in a div with id for ease of removal
                    ui = tags$div(
-                     #orderInput("order",
                      orderInput("imporder", 
                                 "", 
                                 items = 1:(input$imp_ndoses_a*input$imp_ndoses_b), 
@@ -300,7 +314,6 @@ server <- function(input, output, session) {
     # capture all reactive values and look for ones that are order inputs
     orderlist <- reactiveValuesToList(input)
     
-    # ind <- grepl("_order", names(orderlist))
     ind <- grepl("imporder[0-9]*_order", names(orderlist))
     
     
@@ -369,8 +382,22 @@ server <- function(input, output, session) {
     
     req(input$implement)
     
-    list(imp_res()$orders,imp_res()$fit,imp_res()$skeleton)
+    out <- 
+      paste0(
+        "order.prob: ",
+        paste0(imp_res()$fit$ord.prob, collapse = ","),
+        "\n",
+        "order.est: ",
+        imp_res()$fit$order.est,
+        "\n",
+        "a.est: ",
+        imp_res()$fit$a.est,
+        "\n",
+        "dose.rec: ",
+        imp_res()$fit$dose.rec)
     
+    cat(out)
+
   })
   
   output$imp_res_df <- renderTable({
@@ -497,6 +524,15 @@ ui <-
                                numericInput("seed", "Random Seed", value = sample(1:1e5, 1))),
                         id = "sim_other_inputs")
                       ),
+                      shinyjs::hidden(
+                        fluidRow(
+                          tags$hr(),
+                          column(6,
+                                 tags$h3("Results")
+                          ),
+                          id = "sim-results-label"
+                        )
+                      ),
                       fluidRow(
                         column(6,
                                tableOutput("sim_res_df")
@@ -547,6 +583,15 @@ ui <-
                         ),
                         id = "imp_other_inputs")
                       ),
+                      shinyjs::hidden(
+                        fluidRow(
+                          tags$hr(),
+                          column(6,
+                                 tags$h3("Results")
+                          ),
+                          id = "imp-results-label"
+                        )
+                        ),
                       fluidRow(
                         column(6,
                           tableOutput("imp_res_df")),
