@@ -145,13 +145,13 @@ server <- function(input, output, session) {
     
     out <-
       paste0(
-        "percent.DLT:",
+        "percent.DLT: ",
         sim_res()$fit$percent.DLT,
         "\n",
-        "mean.n:",
+        "mean.n: ",
         sim_res()$fit$mean.n,
         "\n",
-        "acceptable:",
+        "acceptable: ",
         sim_res()$fit$acceptable)
 
     cat(out)
