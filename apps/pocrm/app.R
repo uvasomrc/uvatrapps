@@ -106,6 +106,16 @@ server <- function(input, output, session) {
     
   })
   
+  # handle showing stopn
+  
+  observe({
+    if(input$stop) {
+      shinyjs::show("stopn")
+    } else {
+      shinyjs::hide("stopn")
+    }
+  })
+  
   output$sim_hot <- renderRHandsontable({
     
     DF <- matrix(0, 
@@ -219,17 +229,17 @@ server <- function(input, output, session) {
     
     # number of patients used to define stopping rule
     
-    # if(input$stop) {
-    #   
-    #   stop <- input$stopn
-    #   
-    # } else {
-    #   
-    #   stop <- n + 1
-    #   
-    # }
+    if(input$stop) {
+
+      stop <- input$stopn
+
+    } else {
+
+      stop <- n + 1
+
+    }
     
-    stop <- n + 1
+    # stop <- n + 1
     
     #The target toxicity rate
     theta <- input$sim_target
@@ -532,6 +542,10 @@ ui <-
                         ),
                         column(2,
                                numericInput("samplesize", "Maximum Sample Size", min = 1, max = 100000, value=60),
+                               checkboxInput("stop", "Observe stopping rule", value = TRUE),
+                               shinyjs::hidden(
+                                 numericInput("stopn", "Number treated on any combination to stop", min = 1, max = 100000, value = 10)
+                               ),
                                radioButtons("cohort", "Cohort Size", choices = 1:3, inline = TRUE),
                                numericInput("nsim", "Number of Simulations", min = 1, max = 100000, value = 10),
                                numericInput("seed", "Random Seed", value = sample(1:1e5, 1))),
