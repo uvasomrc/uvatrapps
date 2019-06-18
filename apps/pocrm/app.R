@@ -471,7 +471,7 @@ server <- function(input, output, session) {
 }
 
 ui <- 
-  navbarPage(fluid = TRUE, title = "POCRM",
+  navbarPage(fluid = TRUE, title = "Partial Order Continual Reassessment Method",
              tabPanel(title = "Simulation",
                       useShinyjs(),
                       extendShinyjs(text = sim_jsResetCode),
