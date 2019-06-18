@@ -145,13 +145,13 @@ server <- function(input, output, session) {
     
     out <-
       paste0(
-        "percent.DLT: ",
+        "Overall Percent DLT: ",
         sim_res()$fit$percent.DLT,
         "\n",
-        "mean.n: ",
+        "Average Sample Size: ",
         sim_res()$fit$mean.n,
         "\n",
-        "acceptable: ",
+        "Percent Acceptable MTD Selection: ",
         sim_res()$fit$acceptable)
 
     cat(out)
@@ -162,7 +162,14 @@ server <- function(input, output, session) {
     
     req(input$simulate)
     
-    sim_res()$df
+    df <- sim_res()$df
+    
+    names(df) <- c("Combinations",
+                   "True DLT\nProbability",
+                   "MTD Selection\nPercentage",
+                   "Patient Allocation\nPercentage")
+    
+    df
     
   })
   
@@ -384,16 +391,16 @@ server <- function(input, output, session) {
     
     out <- 
       paste0(
-        "order.prob: ",
+        "Ordering Probabilities: ",
         paste0(imp_res()$fit$ord.prob, collapse = ","),
         "\n",
-        "order.est: ",
+        "Estimated Ordering: ",
         imp_res()$fit$order.est,
         "\n",
-        "a.est: ",
+        "Model Parameter Estimate: ",
         imp_res()$fit$a.est,
         "\n",
-        "dose.rec: ",
+        "Combination Recommendation: ",
         imp_res()$fit$dose.rec)
     
     cat(out)
@@ -404,7 +411,13 @@ server <- function(input, output, session) {
     
     req(input$implement)
     
-    imp_res()$df
+    df <- imp_res()$df
+    
+    names(df) <- c("Combinations",
+                   "Skeleton",
+                   "Estimated DLT\nProbability")
+    
+    df
     
   })
   
