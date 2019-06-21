@@ -3,11 +3,82 @@ library(rhandsontable)
 library(shinyjqui)
 library(shinyjs)
 library(pocrm)
+library(shinyBS)
 
 sim_jsResetCode <- "shinyjs.sim_reset = function() {history.go(0)}"
 imp_jsResetCode <- "shinyjs.imp_reset = function() {history.go(0)}"
 
 server <- function(input, output, session) {
+  
+  ###########################
+  ## help text
+  addPopover(session=session, 
+             id="info_sim_orders", 
+             title="Orders", 
+             content="<p>All possible orderings of the combinations with regards to their toxicity probabilities. Used to generate the matrix of skeleton values corresponding to the possible orderings of the toxicity probabilities specified by orders.<button type='button' id='close' class='close'onclick='$(&quot;#info_sim_orders&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
+             placement = "bottom",
+             trigger = "click", 
+             options = NULL)
+  
+  ###########################
+  ## help text
+  addPopover(session=session, 
+             id="info_sim_inputs", 
+             title="Simulation Details", 
+             content="<p>
+             <b>Target DLT Rate</b>: Target DLT Rate
+             <br>
+             <b>Acceptable Toxicity Range</b>: A single numeric value used to define a range of 'acceptable' DLT rates. The simulation results will report the percentage of simulated trials that recommended a combination within +/- tox.range of the target rate.
+             <br>
+             <b>Maximum Sample Size</b>: The maximum sample size
+             <br>
+             <b>Observe Stopping Rule</b>: Whether or not to stop trial after observing n treated on any combination.
+             <br>
+             <b>Cohort Size</b>: Cohort Size
+             <br>
+             <b>Number of Simulations</b>: The number of simulations
+             <br>
+             <b>Random Seed</b>: Random seed for the simulation; enter the same random seed to replicate results.
+             <br>
+             <button type='button' id='close' class='close'onclick='$(&quot;#info_sim_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
+             placement = "bottom",
+             trigger = "click", 
+             options = NULL)
+  
+  ###########################
+  ## help text
+  addPopover(session=session, 
+             id="info_imp_combo", 
+             title="Combinations", 
+             content="<p>Labels for the possible combinations of drugs and doses.<br><button type='button' id='close' class='close'onclick='$(&quot;#info_imp_combo&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
+             placement = "bottom",
+             trigger = "click", 
+             options = NULL)
+  
+  ###########################
+  ## help text
+  addPopover(session=session, 
+             id="info_imp_orders", 
+             title="Orders", 
+             content="<p>All possible orderings of the combinations with regards to their toxicity probabilities. Used to generate the matrix of skeleton values corresponding to the possible orderings of the toxicity probabilities specified by orders.<button type='button' id='close' class='close'onclick='$(&quot;#info_imp_orders&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
+             placement = "bottom",
+             trigger = "click", 
+             options = NULL)
+  
+  ###########################
+  ## help text
+  addPopover(session=session, 
+             id="info_imp_inputs", 
+             title="Implementation Details", 
+             content="<p>
+             <b>Target DLT Rate</b>: Target DLT Rate
+             <br>
+             <b>Observed Trial Data</b>: Comma-separated value (csv) file with observed trial data. The file must have two columns: the first should contain the labels for combinations (see 'Combination Labels'), and the second should have observed DLT rate.
+             <br>
+             <button type='button' id='close' class='close'onclick='$(&quot;#info_imp_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
+             placement = "bottom",
+             trigger = "click", 
+             options = NULL)
   
   ###########################
   ## simulation
@@ -101,6 +172,7 @@ server <- function(input, output, session) {
     shinyjs::disable("sim_ndoses_a")
     shinyjs::disable("sim_ndoses_b")
     shinyjs::show("sim_other_inputs")
+    shinyjs::show("sim_headers_help")
     shinyjs::hide("sim_dims")
     shinyjs::show("sim_reset")
     
@@ -372,6 +444,8 @@ server <- function(input, output, session) {
     shinyjs::show("imp_other_inputs")
     shinyjs::hide("imp_dims")
     shinyjs::show("imp_reset")
+    shinyjs::show("imp_headers_help")
+    
     
   })
   
@@ -520,14 +594,26 @@ ui <-
                                shinyjs::hidden(actionButton("sim_reset", "Reset", icon = icon("refresh"))))
                       ),
                       shinyjs::hidden(fluidRow(
+                        shinyjs::hidden(bsButton("renderButton", "Render")),
                         column(4,
-                               tags$h3("True DLT probability at each combination"),
+                               tags$h3("True DLT probability at each combination")),
+                        column(4,
+                               tags$div(h3("Possible orderings of DLT probabilities",
+                                           actionLink("info_sim_orders", "",
+                                                      icon = icon("question-circle-o"))))),
+                        column(4,
+                               tags$div(h3("Specifications for simulation",
+                                           actionLink("info_sim_inputs", "", 
+                                                      icon = icon("question-circle-o"))))),
+                        id = "sim_headers_help"
+                      )),
+                      shinyjs::hidden(fluidRow(
+                        column(4,
                                rHandsontableOutput("sim_hot"),
                                tags$h3("Combination Labels"),
                                tableOutput("sim_matrix")
                         ),
                         column(4,
-                               tags$h3("Possible orderings of DLT probabilities"),
                                tags$div(id = "initial_simorder"),
                                tags$div(id = "sim_placeholder"),
                                tags$div(
@@ -591,12 +677,28 @@ ui <-
                                shinyjs::hidden(actionButton("imp_reset", "Reset", icon = icon("refresh"))))
                       ),
                       shinyjs::hidden(fluidRow(
+                        shinyjs::hidden(bsButton("renderButton", "Render")),
                         column(4,
-                               tags$h3("Combination Labels"),
+                               tags$div(h3("Combination Labels",
+                                           actionLink("info_imp_combo", "",
+                                                      icon = icon("question-circle-o"))))),
+                        column(4,
+                               tags$div(h3("Possible orderings of DLT probabilities",
+                                           actionLink("info_imp_orders", "",
+                                                      icon = icon("question-circle-o"))))),
+                        column(4,
+                               tags$div(h3("Specifications for implementation",
+                                           actionLink("info_imp_inputs", "", 
+                                                      icon = icon("question-circle-o"))))),
+                        id = "imp_headers_help"
+                      )),
+                      shinyjs::hidden(fluidRow(
+                        column(4,
+                               # tags$h3("Combination Labels"),
                                tableOutput("imp_matrix")
                         ),
                         column(4,
-                               tags$h3("Possible orderings of DLT probabilities"),
+                               # tags$h3("Possible orderings of DLT probabilities"),
                                tags$div(id = "initial_imporder"),
                                tags$div(id = "imp_placeholder"),
                                tags$div(
