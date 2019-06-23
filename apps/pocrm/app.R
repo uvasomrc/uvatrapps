@@ -39,7 +39,6 @@ server <- function(input, output, session) {
              <b>Number of Simulations</b>: The number of simulations
              <br>
              <b>Random Seed</b>: Random seed for the simulation; enter the same random seed to replicate results.
-             <br>
              <button type='button' id='close' class='close'onclick='$(&quot;#info_sim_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
              placement = "bottom",
              trigger = "click", 
@@ -50,7 +49,7 @@ server <- function(input, output, session) {
   addPopover(session=session, 
              id="info_imp_combo", 
              title="Combinations", 
-             content="<p>Labels for the possible combinations of drugs and doses.<br><button type='button' id='close' class='close'onclick='$(&quot;#info_imp_combo&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
+             content="<p>Labels for the possible combinations of drugs and doses.<button type='button' id='close' class='close'onclick='$(&quot;#info_imp_combo&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
              placement = "bottom",
              trigger = "click", 
              options = NULL)
@@ -74,7 +73,6 @@ server <- function(input, output, session) {
              <b>Target DLT Rate</b>: Target DLT Rate
              <br>
              <b>Observed Trial Data</b>: Comma-separated value (csv) file with observed trial data. The file must have two columns: the first should contain the labels for combinations (see 'Combination Labels'), and the second should have observed DLT rate.
-             <br>
              <button type='button' id='close' class='close'onclick='$(&quot;#info_imp_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
              placement = "bottom",
              trigger = "click", 
