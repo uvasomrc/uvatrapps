@@ -35,7 +35,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 <a name="how-to-cite"></a>
 ### How to Cite
 
-> Wages NA, Conaway MR, O'Quigley J. Continual reassessment method for partial ordering. Biometrics. 2011 Dec;67(4):1555-63. doi:10.1111/j.1541-0420.2011.01560.x. Epub 2011 Mar 1. PubMed PMID: 21361888; PubMed Central PMCID: PMC3141101.
+> Wages NA, Conaway MR, O'Quigley J. Dose-finding design for multi-drug combinations. Clin Trials. 2011 Aug;8(4):380-9. doi: 10.1177/1740774511408748. Epub 2011 Jun 7. PubMed PMID: 21652689; PubMed Central PMCID: PMC3485079.
 
 ---
 <a name="references"></a>
@@ -43,6 +43,6 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 > O'Quigley J, Pepe M, Fisher L. Continual reassessment method: a practical design for phase 1 clinical trials in cancer. Biometrics. 1990 Mar;46(1):33-48. PubMed PMID: 2350571.
 
-> Wages NA, Conaway MR, O'Quigley J. Dose-finding design for multi-drug combinations. Clin Trials. 2011 Aug;8(4):380-9. doi: 10.1177/1740774511408748. Epub 2011 Jun 7. PubMed PMID: 21652689; PubMed Central PMCID: PMC3485079.
+> Wages NA, Conaway MR, O'Quigley J. Continual reassessment method for partial ordering. Biometrics. 2011 Dec;67(4):1555-63. doi:10.1111/j.1541-0420.2011.01560.x. Epub 2011 Mar 1. PubMed PMID: 21361888; PubMed Central PMCID: PMC3141101.
 
 
