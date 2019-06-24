@@ -26,19 +26,29 @@ server <- function(input, output, session) {
              id="info_sim_inputs", 
              title="Simulation Details", 
              content="<p>
-             <b>Target DLT Rate</b>: Target DLT Rate
+             <b>Target DLT Rate</b>
              <br>
-             <b>Acceptable Toxicity Range</b>: A single numeric value used to define a range of 'acceptable' DLT rates. The simulation results will report the percentage of simulated trials that recommended a combination within +/- tox.range of the target rate.
+             Acceptable DLT probability that defines the study MTD
              <br>
-             <b>Maximum Sample Size</b>: The maximum sample size
+             <b>Acceptable Toxicity Range</b>
              <br>
-             <b>Observe Stopping Rule</b>: Whether or not to stop trial after observing n treated on any combination.
+             A single numeric value used to define a range of 'acceptable' DLT rates. The simulation results will report the percentage of simulated trials that recommended a combination within +/- tox.range of the target rate.
              <br>
-             <b>Cohort Size</b>: Cohort Size
+             <b>Maximum Sample Size</b>
              <br>
-             <b>Number of Simulations</b>: The number of simulations
+             The maximum number of participants to be accrued
              <br>
-             <b>Random Seed</b>: Random seed for the simulation; enter the same random seed to replicate results.
+             <b>Observe Stopping Rule</b>
+             <br>
+             Whether or not to the trial will stop once a certain number of participants have been treated on any combination
+             <br>
+             <b>Cohort Size</b>
+             <br>
+             The number of participants required before the next model-based update
+             <br>
+             <b>Number of Simulations</b>
+             <br>
+             The number of simulated trials. Recommended minimum is 1000.
              <button type='button' id='close' class='close'onclick='$(&quot;#info_sim_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
              placement = "bottom",
              trigger = "click", 
@@ -70,9 +80,13 @@ server <- function(input, output, session) {
              id="info_imp_inputs", 
              title="Implementation Details", 
              content="<p>
-             <b>Target DLT Rate</b>: Target DLT Rate
+             <b>Target DLT Rate</b>
              <br>
-             <b>Observed Trial Data</b>: Comma-separated value (csv) file with observed trial data. The file must have two columns: the first should contain the labels for combinations (see 'Combination Labels'), and the second should have observed DLT rate.
+             Acceptable DLT probability that defines the study MTD
+             <br>
+             <b>Observed Trial Data</b>
+             <br>
+Comma-separated value (csv) file with observed trial data. The file must have two columns: the first should contain the labels for combinations (see 'Combination Labels') that have been tried to this point in the study, and the second should have indicators of DLT outcomes (Yes=1,No=0).
              <button type='button' id='close' class='close'onclick='$(&quot;#info_imp_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
              placement = "bottom",
              trigger = "click", 
