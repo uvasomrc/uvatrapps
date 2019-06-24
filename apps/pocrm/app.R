@@ -726,6 +726,9 @@ ui <-
                           verbatimTextOutput("imp_sum"))
                         
                       )
+             ),
+             tabPanel("About",
+                      includeMarkdown("about.md")
              )
              
   )
