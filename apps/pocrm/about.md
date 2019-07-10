@@ -14,35 +14,36 @@
 <a name="getting-started"></a>
 ### Getting Started
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Begin by specifying the number of dose levels of each agent, A and B, under investigation to form a matrix of K drug combinations labeled 1 through K. 
 
 ---
 
 <a name="simulation"></a>
 ### Simulation
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
+Input the hypothesized true DLT probabilities for each combination in the grid provided on the far left of the application. Specify the possible orderings for the DLT probabilities for your trial according to the labels given on the far left side of the application. It is imperative in using pocrm correctly that the user maintains the monotonicity assumption across rows and up columns of the matrix of combinations. This can be done by adhering to the across row, up columns, up/down diagonal specification technique outlined by Wages and Conaway (2013). On the far right side of the application, complete the design specifications based on the details of your trial. Click the **Simulate box** to generate operating characteristics under the scenario provided. Click on the question mark next to the possible orderings or simulation specifications for more information about each input. 
 ---
 
 <a name="implementation"></a>
 ### Implementation
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Specify the possible orderings for the DLT probabilities for your trial according to the labels given on the far left side of the application. It is imperative in using pocrm correctly that the user maintains the monotonicity assumption across rows and up columns of the matrix of combinations. This can be done by adhering to the across row, up columns, up/down diagonal specification technique outlined by Wages and Conaway (2013). On the far right side of the application, complete the design specifications based on the details of your trial, and upload a .csv file with your current accumulated trial data. Click the **Get updated recommendation** box to generate an updated combination recommendation for the next participant based on the data provided. Click on the question mark next to the combination labels, possible orderings, or simulation specifications for more information about each input.
 
 ---
 
 <a name="how-to-cite"></a>
 ### How to Cite
 
-> Wages NA, Conaway MR, O'Quigley J. Dose-finding design for multi-drug combinations. Clin Trials. 2011 Aug;8(4):380-9. doi: 10.1177/1740774511408748. Epub 2011 Jun 7. PubMed PMID: 21652689; PubMed Central PMCID: PMC3485079.
+> Wages NA, Conaway MR, O’Quigley J. Dose-finding design for multi-drug combinations. Clin Trials 2011; 8: 380-9. PMCID: PMC3485079.
 
 ---
 <a name="references"></a>
 ### Additional References
 
-> O'Quigley J, Pepe M, Fisher L. Continual reassessment method: a practical design for phase 1 clinical trials in cancer. Biometrics. 1990 Mar;46(1):33-48. PubMed PMID: 2350571.
+> Wages NA, Conaway MR, O’Quigley J. Continual reassessment method for partial ordering. Biometrics 2011; 67: 1555-63. PMCID: PMC3141101.
 
-> Wages NA, Conaway MR, O'Quigley J. Continual reassessment method for partial ordering. Biometrics. 2011 Dec;67(4):1555-63. doi:10.1111/j.1541-0420.2011.01560.x. Epub 2011 Mar 1. PubMed PMID: 21361888; PubMed Central PMCID: PMC3141101.
+> Wages NA, Conaway MR. Specifications of a continual reassessment method design for phase I trials of combined drugs. Pharm Stat 2013; 12: 217-24. PMCID: PMC3771354.
+
+> Wages NA, Varhegyi N. pocrm: an R package for phase I trials of combinations of agents. Comput Methods Programs Biomed 2013; 112: 211-8. PMCID: PMC3775989.
 
 
