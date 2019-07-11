@@ -147,7 +147,6 @@ Comma-separated value (csv) file with observed trial data. The file must have tw
     # ind <- grepl("_order", names(orderlist))
     ind <- grepl("simorder[0-9]*_order", names(orderlist))
     
-    
     orderlist <- orderlist[ind]
     
     # bind the values together
@@ -276,7 +275,7 @@ Comma-separated value (csv) file with observed trial data. The file must have tw
     # transpose (to get the vector in row order) ...
     # convert to vector
     r <- unlist(isolate(input$sim_hot)$data)
-    r <- matrix(r, 
+    r <- matrix(r,
                 ncol = input$sim_ndoses_b, 
                 nrow = input$sim_ndoses_a, 
                 byrow = TRUE)
@@ -286,6 +285,15 @@ Comma-separated value (csv) file with observed trial data. The file must have tw
     # get orders generated and stored in reactive value (sim_vals)
     orders <-
       sim_vals$orders_data
+    
+    # make sure orders are ordered in sequence they were input
+    if(!is.null(rownames(orders))) {
+      orders <-
+        orders[order(rownames(orders)),]
+    }
+
+    # double check that orders are captured as numeric
+    class(orders) <- "numeric"
     
     # how many combinations of dosages are there?
     nlevel <- sim_ndoses()$a*sim_ndoses()$b
@@ -357,10 +365,9 @@ Comma-separated value (csv) file with observed trial data. The file must have tw
     list(fit = fit,
          orders = orders,
          df = df)
+         
     
   })
-  
-  
   
   ###########################
   ## implementation
@@ -522,6 +529,15 @@ Comma-separated value (csv) file with observed trial data. The file must have tw
     # get orders generated and stored in reactive value (imp_vals)
     orders <-
       imp_vals$orders_data
+    
+    # make sure orders are ordered in sequence they were input
+    if(!is.null(rownames(orders))) {
+      orders <-
+        orders[order(rownames(orders)),]
+    }
+    
+    # double check that orders are captured as numeric
+    class(orders) <- "numeric"
     
     # how many combinations of dosages are there?
     nlevel <- imp_ndoses()$a*imp_ndoses()$b
