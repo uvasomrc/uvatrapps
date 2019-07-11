@@ -245,7 +245,10 @@ Comma-separated value (csv) file with observed trial data. The file must have tw
         sim_res()$fit$mean.n,
         "\n",
         "Percent Acceptable MTD Selection: ",
-        sim_res()$fit$acceptable)
+        sim_res()$fit$acceptable,
+        "\n",
+        "Skeleton: ",
+        paste(round(sim_res()$skeleton, 3), collapse = ","))
 
     cat(out)
     
@@ -364,7 +367,8 @@ Comma-separated value (csv) file with observed trial data. The file must have tw
     
     list(fit = fit,
          orders = orders,
-         df = df)
+         df = df,
+         skeleton = skeleton)
          
     
   })
@@ -660,7 +664,7 @@ ui <-
                                shinyjs::hidden(
                                  numericInput("stopn", "Number treated on any combination to stop", min = 1, max = 100000, value = 10)
                                ),
-                               radioButtons("cohort", "Cohort Size", choices = 1:3, inline = TRUE),
+                               radioButtons("cohort", "Stage 1 Cohort Size", choices = 1:3, inline = TRUE),
                                numericInput("nsim", "Number of Simulations", min = 1, max = 100000, value = 10),
                                numericInput("seed", "Random Seed", value = sample(1:1e5, 1))),
                         id = "sim_other_inputs")
