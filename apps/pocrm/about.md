@@ -21,7 +21,8 @@ Begin by specifying the number of dose levels of each agent, A and B, under inve
 <a name="simulation"></a>
 ### Simulation
 
-Input the hypothesized true DLT probabilities for each combination in the grid provided on the far left of the application. Specify the possible orderings for the DLT probabilities for your trial according to the labels given on the far left side of the application. It is imperative in using pocrm correctly that the user maintains the monotonicity assumption across rows and up columns of the matrix of combinations. This can be done by adhering to the across row, up columns, up/down diagonal specification technique outlined by Wages and Conaway (2013). On the far right side of the application, complete the design specifications based on the details of your trial. Click the **Simulate box** to generate operating characteristics under the scenario provided. Click on the question mark next to the possible orderings or simulation specifications for more information about each input. 
+Input the hypothesized true DLT probabilities for each combination in the grid provided on the far left of the application. Specify the possible orderings for the DLT probabilities for your trial according to the labels given on the far left side of the application. It is imperative in using pocrm correctly that the user maintains the monotonicity assumption across rows and up columns of the matrix of combinations. This can be done by adhering to the across row, up columns, up/down diagonal specification technique outlined by Wages and Conaway (2013). On the far right side of the application, complete the design specifications based on the details of your trial. Click the **Simulate box** to generate operating characteristics under the scenario provided. Click on the question mark next to the possible orderings or simulation specifications for more information about each input.
+
 ---
 
 <a name="implementation"></a>
