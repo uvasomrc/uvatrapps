@@ -44,7 +44,7 @@ server <- function(input, output, session) {
              <br>
              <b>Cohort Size</b>
              <br>
-             The number of participants required before the next model-based update
+             Stage 1 escalation proceeds according to the first ordering entered into the set of possible orderings in cohorts of 1, 2, or 3 patients as specified by the user. This scheme will only be used until the first DLT is observed, at which time the design switches to Stage 2 model-based allocation. In Stage 2, the cohort size is 1.
              <br>
              <b>Number of Simulations</b>
              <br>
@@ -87,6 +87,8 @@ server <- function(input, output, session) {
              <b>Observed Trial Data</b>
              <br>
 Comma-separated value (csv) file with observed trial data. The file must have two columns: the first should contain the labels for combinations (see 'Combination Labels') that have been tried to this point in the study, and the second should have indicators of DLT outcomes (Yes=1,No=0).
+            <br>
+Note: please include a header in the first row and begin data entry on the second row.
              <button type='button' id='close' class='close'onclick='$(&quot;#info_imp_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
              placement = "bottom",
              trigger = "click", 
@@ -247,7 +249,7 @@ Comma-separated value (csv) file with observed trial data. The file must have tw
         "Percent Acceptable MTD Selection: ",
         sim_res()$fit$acceptable,
         "\n",
-        "Skeleton: ",
+        "Skeleton used to construct working models: ",
         paste(round(sim_res()$skeleton, 3), collapse = ","))
 
     cat(out)
