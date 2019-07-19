@@ -49,6 +49,10 @@ server <- function(input, output, session) {
              <b>Number of Simulations</b>
              <br>
              The number of simulated trials. Recommended minimum is 1000.
+             <br>
+             <b>Safety stopping rule</b>
+             <br>
+             Stop the trial for safety if the lower limit of an 80% Agresti-Coull (1998) binomial confidence interval for the lowest combination exceeds the target DLT rate.
              <button type='button' id='close' class='close'onclick='$(&quot;#info_sim_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
              placement = "bottom",
              trigger = "click", 
@@ -86,9 +90,9 @@ server <- function(input, output, session) {
              <br>
              <b>Observed Trial Data</b>
              <br>
-Comma-separated value (csv) file with observed trial data. The file must have two columns: the first should contain the labels for combinations (see 'Combination Labels') that have been tried to this point in the study, and the second should have indicators of DLT outcomes (Yes=1,No=0).
-            <br>
-Note: please include a header in the first row and begin data entry on the second row.
+             Comma-separated value (csv) file with observed trial data. The file must have two columns: the first should contain the labels for combinations (see 'Combination Labels') that have been tried to this point in the study, and the second should have indicators of DLT outcomes (Yes=1,No=0).
+             <br>
+             Note: please include a header in the first row and begin data entry on the second row.
              <button type='button' id='close' class='close'onclick='$(&quot;#info_imp_inputs&quot;).popover(&quot;hide&quot;);'>&times;</button></p>",
              placement = "bottom",
              trigger = "click", 
@@ -240,19 +244,28 @@ Note: please include a header in the first row and begin data entry on the secon
     
     out <-
       paste0(
-        "Overall Percent DLT: ",
+        "Overall DLT Proportion: ",
         sim_res()$fit$percent.DLT,
+        "\n",
+        "Proportion of trials stopped for safety: ",
+        sim_res()$fit$stop.safety,
         "\n",
         "Average Sample Size: ",
         sim_res()$fit$mean.n,
         "\n",
-        "Percent Acceptable MTD Selection: ",
+        "Proportion Acceptable MTD Selection: ",
         sim_res()$fit$acceptable,
         "\n",
         "Skeleton used to construct working models: ",
-        paste(round(sim_res()$skeleton, 3), collapse = ","))
-
+        paste(round(sim_res()$skeleton, 3), collapse = ","),
+        "\n",
+        "Safety stopping bounds:\n "
+        # print(sim_res()$fit$stop.bounds)
+      )
+    
+    
     cat(out)
+    print(sim_res()$fit$stop.bounds)
     
   })
   
@@ -264,8 +277,8 @@ Note: please include a header in the first row and begin data entry on the secon
     
     names(df) <- c("Combinations",
                    "True DLT\nProbability",
-                   "MTD Selection\nPercentage",
-                   "Patient Allocation\nPercentage")
+                   "MTD Selection\nProportion",
+                   "Patient Allocation\nProportion")
     
     df
     
@@ -296,7 +309,7 @@ Note: please include a header in the first row and begin data entry on the secon
       orders <-
         orders[order(rownames(orders)),]
     }
-
+    
     # double check that orders are captured as numeric
     class(orders) <- "numeric"
     
@@ -327,13 +340,13 @@ Note: please include a header in the first row and begin data entry on the secon
     # number of patients used to define stopping rule
     
     if(input$stop) {
-
+      
       stop <- input$stopn
-
+      
     } else {
-
+      
       stop <- n + 1
-
+      
     }
     
     # stop <- n + 1
@@ -348,6 +361,161 @@ Note: please include a header in the first row and begin data entry on the secon
     tox.range <- input$toxrange
     
     set.seed(input$seed)
+    
+    pocrm.sim<-function(r,alpha,prior.o,x0,stop,n,theta,nsim,tox.range){
+      
+      library(nnet)
+      library(binom)
+      
+      toxmonitoring<-function(theta,n){
+        mintox<-rep(0,n)
+        for(i in 1:n){
+          lv=rep(0,i)
+          for(k in 1:i){
+            lv[k]<-as.numeric(binom.confint(k,i,conf.level=0.8,methods="agresti-coull")$lower>theta)
+          }
+          mintox[i]<-ifelse(all(lv==0),0,min(which(lv==1)))
+        }
+        df=data.frame(mintox[2:n],2:n)
+        names(df)=c("#DLTs","#pts")
+        # cat("Stop the study for safety if the observed DLT rate at lowest study dose level >= #DLTs out of #pts treated at lowest study dose level. \n\n");
+        #print(df,row.names=FALSE);
+        df
+      }
+      
+      ###Load the function 'lpocrm' 
+      lpocrm<-function(r,alpha,prior.o,x0,stop,n,theta){
+        
+        # if a single ordering is inputed as a vector, convert it to a matrix
+        if(is.vector(alpha)) alpha=t(as.matrix(alpha));
+        
+        nord.tox = nrow(alpha);
+        mprior.tox = prior.o;  # prior for each toxicity ordering
+        
+        bcrml<-function(a,p1,y,n){
+          lik=0
+          for(j in 1:length(p1)){
+            lik=lik+y[j]*a*log(p1[j])+(n[j]-y[j])*log((1-p1[j]**a));
+          }
+          return(lik);
+        }
+        
+        ### run a trial 	
+        ncomb = ncol(alpha);   #number of combos
+        y=npts=ptox.hat=comb.select=numeric(ncomb);  
+        comb.curr = x0[1];  # current dose level	 
+        stoprule=0; #indicate if trial stops early
+        i=1
+        
+        stage1<-c(x0,rep(ncol(alpha),n-length(x0)))
+        
+        ##Stage 1
+        while(i <= n){
+          y[comb.curr] = y[comb.curr] + rbinom(1,1,r[comb.curr]);
+          npts[comb.curr] = npts[comb.curr] + 1;
+          
+          if(sum(y)==sum(npts)){
+            safety=ifelse(npts[1]>1,binom.confint(y[1],npts[1],conf.level=.9,methods="agresti-coull")$lower,0)
+            
+            if(safety>theta){
+              stoprule=1
+              break
+            }
+            
+            comb.curr<-ifelse(comb.curr==1,comb.curr,comb.curr-1)
+          } else if(sum(y)==0){
+            comb.curr<-ifelse(comb.curr==ncomb,comb.curr,stage1[i+1])
+          } else {
+            break
+          }
+          if(any(npts>stop)){
+            stoprule<-0
+            break
+          }
+          i=i+1
+        }
+        
+        #Stage 2
+        while(sum(npts) <= n)
+        {
+          if(sum(y)==0){
+            stop=0
+            break
+          } else{
+            like.tox= est.tox=rep(0, nord.tox);
+            for(k in 1:nord.tox)
+            {
+              est.tox[k]<-optimize(f=bcrml,interval=c(0,100),p1=alpha[k,],y=y,n=npts,maximum=T)$maximum
+              like.tox[k]<-optimize(f=bcrml,interval=c(0,100),p1=alpha[k,],y=y,n=npts,maximum=T)$objective
+            }		
+            
+            postprob.tox = (exp(like.tox)*mprior.tox)/sum(exp(like.tox)*mprior.tox);
+            # toxicity model selection, identify the model with the highest posterior prob
+            if(nord.tox>1){ 
+              mtox.sel = which.is.max(postprob.tox); 
+            } else{
+              mtox.sel = 1;
+            }
+            
+            ptox.hat=alpha[mtox.sel,]**est.tox[mtox.sel]
+            
+            safety=ifelse(npts[1]>1,binom.confint(y[1],npts[1],conf.level=.9,methods="agresti-coull")$lower,0)
+            
+            if(safety>theta){
+              stoprule=1
+              break
+            }
+            
+            
+            loss=abs(ptox.hat-theta)
+            comb.curr=which.is.max(-loss)
+            if(npts[comb.curr]==stop){
+              stoprule<-0
+              break
+            }
+            
+            if(sum(npts)==n){
+              stoprule=0
+              break
+            } else{
+              # generate data for a new cohort of patients
+              y[comb.curr] = y[comb.curr] + rbinom(1,1,r[comb.curr]);
+              npts[comb.curr] = npts[comb.curr] + 1;
+            }
+          }
+        }
+        if(stoprule==0){
+          comb.select[comb.curr]=comb.select[comb.curr]+1;
+        }
+        return(list(MTD.selection=comb.select,tox.data=y,patient.allocation=npts,stoprule=stoprule))
+      }
+      ##########'lpocrm' end here
+      
+      
+      
+      ###Load the function 'lpocrm.sim' 
+      lpocrm.sim<-function(nsim){
+        ncomb=length(r)
+        
+        comb.select<-y<-npts<-matrix(nrow=nsim,ncol=ncomb)
+        trialsize<-rep(0,nsim)
+        
+        for(i in 1:nsim){
+          result<-lpocrm(r,alpha,prior.o,x0,stop,n,theta)
+          comb.select[i,]=result$MTD.selection
+          y[i,]=result$tox.data
+          npts[i,]=result$patient.allocation
+          trialsize[i]=sum(result$patient.allocation)
+        }
+        return(list(true.prob=r,MTD.selection=round(colMeans(comb.select),3),patient.allocation=round(colMeans(npts)/mean(trialsize),3),percent.DLT=round(sum(colMeans(y))/mean(trialsize),3),mean.n=round(mean(trialsize),3),acceptable=sum(colMeans(comb.select)[which(round(abs(r-theta),2)<=tox.range)]),
+                    stop.safety=1-sum(round(colMeans(comb.select),2)),stop.bounds=toxmonitoring(theta,n)))
+      }
+      lpocrm.sim(nsim)
+      
+    }
+    
+    
+    
     
     fit <- pocrm.sim(r,
                      alpha,
@@ -371,7 +539,7 @@ Note: please include a header in the first row and begin data entry on the secon
          orders = orders,
          df = df,
          skeleton = skeleton)
-         
+    
     
   })
   
@@ -509,11 +677,16 @@ Note: please include a header in the first row and begin data entry on the secon
         "Model Parameter Estimate: ",
         imp_res()$fit$a.est,
         "\n",
+        "Skeleton used to construct working models: ",
+        paste(round(imp_res()$skeleton, 3), collapse = ","),
+        "\n\n",
         "Combination Recommendation: ",
-        imp_res()$fit$dose.rec)
+        imp_res()$fit$dose.rec
+        
+      )
     
     cat(out)
-
+    
   })
   
   output$imp_res_df <- renderTable({
@@ -523,7 +696,7 @@ Note: please include a header in the first row and begin data entry on the secon
     df <- imp_res()$df
     
     names(df) <- c("Combinations",
-                   "Skeleton",
+                   #"Skeleton",
                    "Estimated DLT\nProbability")
     
     df
@@ -587,7 +760,7 @@ Note: please include a header in the first row and begin data entry on the secon
     df <-
       data.frame(
         levels = 1:length(orders[1,]),
-        skeleton = skeleton,
+        #skeleton = skeleton,
         `Estimated DLT Probability` = fit$ptox.est
       )
     
@@ -754,12 +927,12 @@ ui <-
                           ),
                           id = "imp-results-label"
                         )
-                        ),
+                      ),
                       fluidRow(
                         column(6,
-                          tableOutput("imp_res_df")),
+                               tableOutput("imp_res_df")),
                         column(6,
-                          verbatimTextOutput("imp_sum"))
+                               verbatimTextOutput("imp_sum"))
                         
                       )
              ),
