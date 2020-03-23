@@ -83,7 +83,7 @@ ui<-(navbarPage("Adaptive dose-finding based on safety and feasibility in early-
                           # p("2.", strong("Safety Stopping Rule:"), "Stop the trial for safety if the lower limit of a 90% probability interval exceeds the target DLT rate."),
                            #p("3.", strong("Futility Stopping Rule:"), "Stop the trial for futility if the upper limit of a 90% probability interval is lower than the minimum acceptable efficacy rate."),
                            strong("References:"),
-                           p("[1] Wages NA, Fadul CE (2019). Adaptive dose finding based on safety and feasibility in early-phase clinical trials of adoptive cell immunotherapy.", em("Clin Trials;"), strong("in press"))
+                           p("[1] Wages NA, Fadul CE (2019). Adaptive dose finding based on safety and feasibility in early-phase clinical trials of adoptive cell immunotherapy.", em("Clin Trials;"),"[epub ahead of print] Dec 20.")
                           
                          ),
                          tags$style(type="text/css",
@@ -111,27 +111,47 @@ ui<-(navbarPage("Adaptive dose-finding based on safety and feasibility in early-
                          #input: theta
                          numericInput("theta","Target DLT rate",0.20,0,1,0.01,NULL),
                          
+                         #br(),
+                         h5("2. Enter the minimum acceptable probability of feasibility that defines the threshold for desireable feasibility"),
+                         #input: ell
+                         numericInput("thetastar","Minimum acceptable feasibility rate",0.50,0,1,0.01,NULL),
+                         
                          br(),
                          h4(strong("Observed Trial Data (do not count 'replaced' patients)")),
                          #br(),
                          #input: boxes for truth input values OR text field
-                         h5("2. Enter number of observed DLTs at each dose level. If none have been observed or a dose level has not yet been tried, enter '0'.", strong("Note:"), "The length of this set should be equal to the number of possible study dose levels."),
+                         h5("3. Enter number of observed DLTs at each dose level. If none have been observed or a dose level has not yet been tried, enter '0'.", strong("Note:"), "The length of this set should be equal to the number of possible study dose levels."),
                          textInput("y","Number of observed DLTs at each dose level",value="0,1,0,0,0",width=NULL),
                          
                          br(),
-                         h5("3. Enter the number of patients evaluated for DLT at each dose level. If a dose level has not yet been tried, enter '0'.", strong("Note:"), "The length of this set should be equal to the number of possible study dose levels."),
+                         h5("4. Enter the number of patients evaluated for DLT at each dose level. If a dose level has not yet been tried, enter '0'.", strong("Note:"), "The length of this set should be equal to the number of possible study dose levels."),
                          #input: boxes for truth input values OR text field
                          textInput("n","Number of patients evaluated for DLT at each dose level",value="2,4,0,0,0",width=NULL),
                          
                          br(),
-                         h5("4. Enter the most recent dose level administered in the study."),
+                         #input: boxes for truth input values OR text field
+                         h5("5. Enter number of patients feasible to receive each dose level. If none have been observed, enter '0'.", strong("Note:"), "The length of this set should be equal to the number of possible study dose levels."),
+                         textInput("z","Number of patients feasible to receive each dose level",value="6,6,5,5,4",width=NULL),
+                         
+                         br(),
+                         h5("6. Enter the number of patients accrued to the study that have had cells obtained.", strong("Note:"), "The length of this set should be equal to the number of possible study dose levels."),
+                         #input: boxes for truth input values OR text field
+                         numericInput("m","Number of patients accrued to the study",6,1,NA,1,NULL),
+                         
+                         br(),
+                         h5("7. Enter the most recent dose level administered in the study."),
                          #input: dose.curr
                          numericInput("dose.curr","Current dose level",1,1,NA,1,NULL),
                          
                          br(),
-                         h5("5. Specify the threshold for defining the safety stopping rule based on an unacceptable high DLT rate at the lowest study dose level."),
+                         h5("8. Specify the threshold for defining the safety stopping rule based on an unacceptable high DLT rate at the lowest study dose level."),
                          #input: tul
-                         numericInput("cs","Threshold for defining safety stopping rule",0.90,0,1,0.01,NULL),
+                         numericInput("cs","Threshold for defining safety stopping rule",0.70,0,1,0.01,NULL),
+                         
+                         br(),
+                         h5("9. Specify the threshold for defining the feasbility stopping rule based on an unacceptable low feasibility rate at the lowest study dose level."),
+                         #input: tul
+                         numericInput("cf","Threshold for defining feasibility stopping rule",0.70,0,1,0.01,NULL),
                          
                          #input: submit button
                          submitButton("Get updated recommended dose level",icon("flask"),NULL),
@@ -150,7 +170,7 @@ ui<-(navbarPage("Adaptive dose-finding based on safety and feasibility in early-
                            #  p("3.", strong("Starting dose level:"), "Each trial should begin at the lowest study dose level."),
                            # p("Click",a("here",target="_blank",href="http://faculty.virginia.edu/model-based_dose-finding/nonparametric%20b
                            strong("References:"),
-                           p("[1] Wages NA, Fadul CE (2019). Adaptive dose finding based on safety and feasibility in early-phase clinical trials of adoptive cell immunotherapy.", em("Clin Trials;"), strong("in press"))
+                           p("[1] Wages NA, Fadul CE (2019). Adaptive dose finding based on safety and feasibility in early-phase clinical trials of adoptive cell immunotherapy.", em("Clin Trials;"),"[epub ahead of print] Dec 20.")
                            #p("[2] Lee and Cheung (2009). Model calibration in the continual reassessment method, ", em("Clinical Trials;"), strong("6"),"(3): 227-238."),
                            #p("[3] Lee and Cheung (2011). Calibration of prior variance in the bayesian continual reassessment method, ", em("Statistics in Medicine;"), strong("30"),"(17): 2081-2089.")
                            #p("[3] Cheung YK (2011). ", em("Dose-finding by the continual reassessment method."), "Chapman and Hall/CRC press: New York.")
@@ -446,10 +466,28 @@ server <- function(input, output) {
   } 
   ##########'WFdesign.sim' end here
   
-  impbcdp<-function(y,n,theta,dose.curr,cs){
+  impbcdp<-function(y,n,z,m,theta,thetastar,dose.curr,cs,cf){
     library(Iso)
     d=ndose=length(y)
-    ptox.hat = numeric(ndose);
+    ptox.hat =p.infeas= numeric(ndose);
+    
+    q.skel<-seq(0.90,0.90-(0.05*(ndose-1)),length.out=ndose)	  ##prior means for infusibility probabilities
+    aplus=rep(0,length(q.skel))	          ##prior sample size at each dose level
+    for(i in 1:length(q.skel)){
+      x=q.skel[i]/2
+      mu=q.skel[i]
+      f<-function(b){
+        1-pbeta(x,mu*b/(1-mu),b)-0.95
+      }
+      bF=uniroot(f,c(0.0001,100))$root
+      aF=mu*bF/(1-mu)
+      aplus[i]=round(aF+bF,2)
+    }
+    A=q.skel*aplus
+    B=aplus-A
+    for(j in 1:ndose){
+      p.infeas[j] = pbeta(thetastar, z[j] + A[j], m - z[j] + B[j]);
+    }
     
     ###calculate prior
     x<-2*theta
@@ -491,23 +529,39 @@ server <- function(input, output) {
     } else {
       dose.curr=sugglev
     }
+  
     
+    fset=which(p.infeas<cf)
+    fmtd=min(max(fset),dose.curr)
+    
+    feasibility=ifelse(m>1,p.infeas[1],0)
     safety=ifelse(n[1]>1,1 - pbeta(theta, y[1] + a0, n[1] - y[1] + b0),0)
     
     
-    ifelse(safety>cs,dose.curr<-"STOP STUDY FOR SAFETY",dose.curr<-dose.curr)
+    #ifelse(safety>cs,dose.curr<-"STOP STUDY FOR SAFETY",dose.curr<-dose.curr)
+    #ifelse(feasibility>cf,dose.curr<-"STOP STUDY FOR FEASIBILITY",dose.curr<-dose.curr)
+    
+    ifelse(safety>cs,fmtd<-"STOP STUDY FOR SAFETY",fmtd<-fmtd)
+    ifelse(feasibility>cf,fmtd<-"STOP STUDY FOR FEASIBILITY",fmtd<-fmtd)
     
     cat("Date and time:                                 ", format(Sys.time()), sep="\t",  "\n");
     cat("Observed number of DLTs:        	      ", y, sep="\t",   "\n");
     cat("Number of patients evaluated for DLT:          ", n, sep="\t",   "\n");
-    cat("Estimated DLT probability at current dose:     ", round(currpi,4), sep="\t",  "\n");
-    cat("Target DLT rate:                               ", theta, sep="\t",  "\n");
-    cat("Recommended next dose level:                   ", dose.curr, sep="\t",  "\n\n");
+    cat("Observed number of feasible patients:       ", z, sep="\t",   "\n");
+    cat("Number of patients with cells extracted:       ", m, sep="\t",   "\n");
+    #cat("Estimated DLT probability at current dose:     ", round(currpi,4), sep="\t",  "\n");
+    #cat("Target DLT rate:                               ", theta, sep="\t",  "\n");
+    #cat("Recommended dose level for next patient (use during trial):          ", dose.curr, sep="\t",  "\n");
+    cat("Estimated feasible maximum tolerated dose: ", fmtd, sep="\t",  "\n\n");
     cat("Design specifications: \n");
     cat("Prior distribution on DLT rate at each dose level:\n");
     cat("beta(",round(a0,2),",",round(b0,2),")","\n");
     cat("Safety stopping rule:\n");
     cat("Stop the trial if the Pr(DLT rate at the lowest study dose level > target | data) > ",cs,"\n");
+    cat("Prior distribution on feasibility rate is Beta(a,b) with:\n");
+    cat("a=(",round(q.skel*aplus,2),") and b=(",round(aplus-(q.skel*aplus),2),")","\n");
+    cat("Feasibility stopping rule:\n");
+    cat("Stop the trial if the Pr(feasibility rate at the lowest study dose level < minimum feasbility rate | data) > ",cf,"\n");
   }
   toxmonitoring<-function(clevel,atul,trialsize){
     ###calculate prior
@@ -594,7 +648,7 @@ server <- function(input, output) {
      #   need(expr=sum(as.numeric(unlist(strsplit(input$y,",",TRUE))))>0, message='Need at least one DLT to generate DLT probability estimates.'),
      #   need(expr=as.numeric(unlist(strsplit(input$n,",",TRUE)))[1]>0, message='Each trial should begin at the lowest study dose level.')
      # )
-      impbcdp(as.numeric(unlist(strsplit(input$y,",",TRUE))),as.numeric(unlist(strsplit(input$n,",",TRUE))),input$theta,input$dose.curr,input$cs)
+      impbcdp(as.numeric(unlist(strsplit(input$y,",",TRUE))),as.numeric(unlist(strsplit(input$n,",",TRUE))),as.numeric(unlist(strsplit(input$z,",",TRUE))),input$m,input$theta,input$thetastar,input$dose.curr,input$cs,input$cf)
     }
   )
   output$stopping <- renderPrint(
