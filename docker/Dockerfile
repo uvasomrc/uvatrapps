@@ -22,9 +22,16 @@ RUN apt-get update && apt-get install -y -t unstable \
     wget --no-verbose "https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/shiny-server-$VERSION-amd64.deb" -O ss-latest.deb && \
     gdebi -n ss-latest.deb && \
     rm -f version.txt ss-latest.deb && \
-    R -e "install.packages(c('shiny','rmarkdown','devtools','binom','dfcrm','nnet','Iso','shinyjqui','shinyjs','V8','rhandsontable','pocrm', 'shinyBS'), repos='https://cran.rstudio.com/')" && \
+    R -e "install.packages(c('rmarkdown','devtools','binom','dfcrm','nnet','Iso','V8','pocrm'), repos='https://cran.rstudio.com/')" && \
     cp -R /usr/local/lib/R/site-library/shiny/examples/* /srv/shiny-server/ && \
     rm -rf /var/lib/apt/lists/*
+
+# install explicit versions of certain pkgs
+RUN R -e "devtools::install_version('shiny', version = '1.3.2', upgrade = FALSE)"
+RUN R -e "devtools::install_version('shinyjs', version = '1.0', upgrade = FALSE)"
+RUN R -e "devtools::install_version('shinyjqui', version = '0.3.2', upgrade = FALSE)"
+RUN R -e "devtools::install_version('shinyBS', version = '0.61', upgrade = FALSE)"
+RUN R -e "devtools::install_version('rhandsontable', version = '0.3.7', upgrade = FALSE)"
 
 # move conf and setup files and clear out shiny server demo apps
 COPY shiny-server.conf  /etc/shiny-server/shiny-server.conf
